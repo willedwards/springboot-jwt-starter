@@ -1,6 +1,10 @@
 
 
 [![Build Status](https://travis-ci.org/willedwards/springboot-jwt-starter.svg?branch=master)](https://travis-ci.org/willedwards/springboot-jwt-starter)
+
+[<img src="https://ashtonhogan.com/images/stickers/svg/tacinga-1.svg">](https://raw.githubusercontent.com/willedwards/springboot-jwt-starter/master/Tacinga%20License%202.x.x.pdf)
+[<img src="https://ashtonhogan.com/images/stickers/svg/obvoyage-1.svg">](https://raw.githubusercontent.com/willedwards/springboot-jwt-starter/master/Obvoyage%20License%202.x.x.pdf)
+
 ### Spring boot + jwt authentication
 
 <p align="center">
