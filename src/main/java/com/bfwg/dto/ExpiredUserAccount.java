@@ -8,13 +8,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
 import java.util.*;
+import javax.naming.OperationNotSupportedException;
 
 @Builder
 @Getter
-public class DefaultUserDetails implements UserDetails {
+public class ExpiredUserAccount implements UserDetails {
 
     public void setPassword(String password) {
-        this.password = password;
+        throw new RuntimeException("setPassword is not supported by this object");
     }
 
     private String password;
@@ -30,8 +31,7 @@ public class DefaultUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role);
-        return Arrays.asList(authority);
+        throw new RuntimeException("getAuthorities is not supported by this object");
     }
 
 //    @Override //this is the key method for jwt
@@ -40,21 +40,21 @@ public class DefaultUserDetails implements UserDetails {
 //    }
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        throw new RuntimeException("isAccountNonLocked is not supported by this object");
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        throw new RuntimeException("isCredentialsNonExpired is not supported by this object");
     }
 
     public Date getLastPasswordResetDate() {
-        return Date.from(Instant.ofEpochMilli(lastPasswordRestTime));
+        throw new RuntimeException("getLastPasswordResetDate is not supported by this object");
     }
 
 }
