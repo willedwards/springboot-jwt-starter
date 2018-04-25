@@ -1,19 +1,15 @@
 package com.bfwg.web;
 
-import com.bfwg.converters.DefaultUserDetailsConverter;
 import com.bfwg.dto.DefaultUserDetails;
-import com.bfwg.remote.UserEntity;
-import com.bfwg.web.request.RegisterRequest;
 import com.bfwg.service.UserService;
+import com.bfwg.web.request.RegisterRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.bfwg.converters.DefaultUserDetailsConverter.from;

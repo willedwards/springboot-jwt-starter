@@ -1,5 +1,7 @@
 package com.bfwg.rest;
 
+import com.bfwg.entities.UserEntityPersister;
+import com.bfwg.service.UserService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +30,10 @@ public class UserControllerTest {
     @Autowired
     private WebApplicationContext context;
 
+    @Autowired
+    UserEntityPersister userEntityPersister;
+
+    //the db needs to be strated with user and admin
     @Before
     public void setup() {
         mvc = MockMvcBuilders

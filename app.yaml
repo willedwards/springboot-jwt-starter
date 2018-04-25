@@ -1,0 +1,14 @@
+runtime: java
+env: standard
+runtime_config:
+   jdk: openjdk8
+   server: jetty9
+manual_scaling:
+  instances: 1
+beta_settings:
+  enable_app_engine_apis: true
+
+handlers:
+- url: /.*
+  script: this field is required, but ignored
+

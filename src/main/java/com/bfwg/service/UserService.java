@@ -1,8 +1,6 @@
 package com.bfwg.service;
 
 import com.bfwg.dto.DefaultUserDetails;
-import com.bfwg.remote.UserEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;

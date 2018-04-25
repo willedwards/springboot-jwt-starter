@@ -1,6 +1,5 @@
 package com.bfwg.web;
 
-import com.bfwg.config.DeviceProvider;
 import com.bfwg.config.TokenHelper;
 import com.bfwg.dto.PasswordChangeRequest;
 import com.bfwg.dto.Token;
@@ -9,7 +8,6 @@ import com.bfwg.web.request.LoginRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mobile.device.Device;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,16 +27,14 @@ public class AuthenticationController {
     @Autowired
     AuthenticationService authenticationService;
 
-    @Autowired
-    private DeviceProvider deviceProvider;
 
     @Autowired
     TokenHelper tokenHelper;
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody LoginRequest loginRequest, Device device) throws AuthenticationException {
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody LoginRequest loginRequest) throws AuthenticationException {
 
-        Token jwt = authenticationService.authenticate(loginRequest, device);
+        Token jwt = authenticationService.authenticate(loginRequest);
         return ResponseEntity.ok(jwt);
     }
 
@@ -46,14 +42,13 @@ public class AuthenticationController {
     public ResponseEntity<?> refreshAuthenticationToken(HttpServletRequest request, Principal principal) {
 
         String authToken = tokenHelper.getToken(request);
-        Device device = deviceProvider.getCurrentDevice(request);
 
         Token token = new Token();
         if (authToken == null || principal == null) {
             return ResponseEntity.accepted().body(token);
         }
 
-        token = authenticationService.refreshExistingToken(authToken, device);
+        token = authenticationService.refreshExistingToken(authToken);
         return ResponseEntity.ok(token);
     }
 

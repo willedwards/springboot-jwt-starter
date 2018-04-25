@@ -1,7 +1,7 @@
 package com.bfwg.converters;
 
 import com.bfwg.dto.DefaultUserDetails;
-import com.bfwg.remote.UserEntity;
+import com.bfwg.entities.UserEntity;
 import com.bfwg.web.UserResponse;
 import com.bfwg.web.request.RegisterRequest;
 
@@ -17,12 +17,14 @@ public class DefaultUserDetailsConverter {
             password(user.getPassword()).
             email(user.getEmail()).
             username(user.getUsername()).
-            firstname(user.getFirstName()).
-            lastname(user.getLastName()).
+//            firstname(user.getFirstName()).
+//            lastname(user.getLastName()).
             role(user.getRole()).
             enabled(user.isEnabled()).
-            phoneNumber(user.getPhoneNumber()).
-            lastPasswordRestTime(user.getLastPasswordResetDate().getTime()).build();
+//            phoneNumber(user.getPhoneNumber()).
+//            lastPasswordRestTime(user.getLastPasswordResetDate().getTime())
+            lastPasswordRestTime(user.getLastPasswordResetDate()).
+                build();
     }
 
     public static DefaultUserDetails from(RegisterRequest registerRequest) {
@@ -53,13 +55,13 @@ public class DefaultUserDetailsConverter {
         entity.setId(userDetails.getId());
         entity.setPassword(userDetails.getPassword());
         entity.setRole(userDetails.getRole());
-        entity.setLastPasswordResetDate(new Timestamp(userDetails.getLastPasswordResetDate().getTime()));
+//        entity.setLastPasswordResetDate(new Timestamp(userDetails.getLastPasswordResetDate().getTime()));
         entity.setEmail(userDetails.getEmail());
-        entity.setPhoneNumber(userDetails.getPhoneNumber());
+//        entity.setPhoneNumber(userDetails.getPhoneNumber());
         entity.setUsername(userDetails.getUsername());
-        entity.setFirstName(userDetails.getFirstname());
-        entity.setLastName(userDetails.getLastname());
-        entity.setEnabled(userDetails.isEnabled());
+//        entity.setFirstName(userDetails.getFirstname());
+//        entity.setLastName(userDetails.getLastname());
+//        entity.setEnabled(userDetails.isEnabled());
 
         String role = userDetails.getRole();
         if(role == null){

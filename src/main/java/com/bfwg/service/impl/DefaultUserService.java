@@ -2,8 +2,8 @@ package com.bfwg.service.impl;
 
 import com.bfwg.converters.DefaultUserDetailsConverter;
 import com.bfwg.dto.DefaultUserDetails;
-import com.bfwg.remote.UserEntity;
-import com.bfwg.remote.repository.UserRepository;
+import com.bfwg.entities.UserEntity;
+import com.bfwg.entities.UserEntityPersister;
 import com.bfwg.service.IdGenerator;
 import com.bfwg.service.UserService;
 import org.apache.commons.logging.Log;
@@ -13,13 +13,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import javax.swing.text.html.parser.Entity;
-import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.bfwg.converters.DefaultUserDetailsConverter.toEntity;
@@ -31,13 +27,13 @@ public class DefaultUserService implements UserService {
 
     final IdGenerator idGenerator;
 
-    final UserRepository userRepository;
+    final UserEntityPersister persister;
     final PasswordEncoder passwordEncoder;
     final AuthenticationManager authenticationManager;
 
-    public DefaultUserService(IdGenerator idGenerator, UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+    public DefaultUserService(IdGenerator idGenerator, UserEntityPersister persister, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
         this.idGenerator = idGenerator;
-        this.userRepository = userRepository;
+        this.persister = persister;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
     }
@@ -45,7 +41,7 @@ public class DefaultUserService implements UserService {
 
     @Override
     public DefaultUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity user = userRepository.findByUsername(username);
+        UserEntity user = persister.findByUsername(username);
         if (user == null) {
             throw new UsernameNotFoundException(String.format("No user found with username '%s'.", username));
         }
@@ -78,16 +74,16 @@ public class DefaultUserService implements UserService {
 
     @Override
     public DefaultUserDetails findByEmail(String email) {
-        UserEntity userEntity = userRepository.findByEmail(email);
+        UserEntity userEntity = persister.findByEmail(email);
         return DefaultUserDetailsConverter.from(userEntity);
     }
 
     @Override
     public DefaultUserDetails findByUsername(String username) throws UsernameNotFoundException {
-        UserEntity u = userRepository.findByUsername(username);
+        UserEntity u = persister.findByUsername(username);
 
         if (u == null) {
-            u = userRepository.findByEmail(username);
+            u = persister.findByEmail(username);
         }
 
         return DefaultUserDetailsConverter.from(u);
@@ -95,13 +91,13 @@ public class DefaultUserService implements UserService {
 
     @Override
     public DefaultUserDetails findById(String id) throws AccessDeniedException {
-        UserEntity u = userRepository.findOne(id);
+        UserEntity u = persister.fromPersistenceStore(id);
         return DefaultUserDetailsConverter.from(u);
     }
 
     @Override
     public List<DefaultUserDetails> findAll() throws AccessDeniedException {
-        List<UserEntity> result = userRepository.findAll();
+        List<UserEntity> result = persister.findAll();
         return DefaultUserDetailsConverter.from(result);
     }
 
@@ -112,7 +108,7 @@ public class DefaultUserService implements UserService {
         userEntity.setEnabled(true);
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         userEntity.setPassword(encodedPassword);
-        userRepository.save(userEntity);
+        persister.save(userEntity);
     }
 
     @Override
@@ -120,7 +116,7 @@ public class DefaultUserService implements UserService {
         UserEntity userEntity = toEntity(user);
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         userEntity.setPassword(encodedPassword);
-        userRepository.save(userEntity);
+        persister.save(userEntity);
     }
 
 }

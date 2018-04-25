@@ -1,10 +1,8 @@
 package com.bfwg.service;
 
-import com.bfwg.config.DeviceProvider;
 import com.bfwg.config.TokenHelper;
 import com.bfwg.dto.Token;
 import com.bfwg.web.request.LoginRequest;
-import org.springframework.mobile.device.Device;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,7 +28,7 @@ public class AuthenticationService {
         this.authenticationManager = authenticationManager;
     }
 
-    public Token authenticate(LoginRequest loginRequest, Device device) {
+    public Token authenticate(LoginRequest loginRequest) {
 
         // Perform the security
         final Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
@@ -45,17 +43,17 @@ public class AuthenticationService {
         // token creation
         UserDetails user = (UserDetails) authentication.getPrincipal();
 
-        String jws = tokenHelper.generateToken(user.getUsername(), device);
-        int expiresIn = tokenHelper.getExpiredIn(device);
+        String jws = tokenHelper.generateToken(user.getUsername());
+        int expiresIn = tokenHelper.getExpiredIn();
 
         return new Token(jws, expiresIn);
     }
 
-    public Token refreshExistingToken(String authToken, Device device) {
+    public Token refreshExistingToken(String authToken) {
 
         // TODO check user password last update
-        String refreshedToken = tokenHelper.refreshToken(authToken, device);
-        int expiresIn = tokenHelper.getExpiredIn(device);
+        String refreshedToken = tokenHelper.refreshToken(authToken);
+        int expiresIn = tokenHelper.getExpiredIn();
         return new Token(refreshedToken, expiresIn);
     }
 

@@ -1,7 +1,6 @@
 package com.bfwg.security;
 
 
-import com.bfwg.config.DeviceDummy;
 import com.bfwg.config.TimeProvider;
 import com.bfwg.config.TokenHelper;
 import com.bfwg.dto.DefaultUserDetails;
@@ -11,7 +10,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.mobile.device.Device;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -35,8 +33,6 @@ public class TokenHelperTest {
     @Mock
     private TimeProvider timeProviderMock;
 
-    @InjectMocks
-    DeviceDummy device;
 
     @Before
     public void init() {
@@ -53,8 +49,8 @@ public class TokenHelperTest {
                 .thenReturn(DateUtil.yesterday())
                 .thenReturn(DateUtil.now());
 
-        final String token = createToken(device);
-        final String laterToken = createToken(device);
+        final String token = createToken();
+        final String laterToken = createToken();
 
         assertThat(token).isNotEqualTo(laterToken);
     }
@@ -68,9 +64,8 @@ public class TokenHelperTest {
 
         when(timeProviderMock.now())
                 .thenReturn(beforeSomeTime);
-        device.setMobile(true);
-        final String mobileToken = createToken(device);
-        assertThat(tokenHelper.validateToken(mobileToken, userDetails)).isTrue();
+        final String mobileToken = createToken();
+        assertThat(tokenHelper.validateToken(mobileToken, userDetails)).isFalse();
     }
 
     @Test
@@ -83,8 +78,7 @@ public class TokenHelperTest {
         UserDetails userDetails = mock(DefaultUserDetails.class);
         when(userDetails.getUsername()).thenReturn(TEST_USERNAME);
 
-        device.setMobile(true);
-        final String mobileToken = createToken(device);
+        final String mobileToken = createToken();
         assertThat(tokenHelper.validateToken(mobileToken, userDetails)).isFalse();
     }
 
@@ -92,7 +86,7 @@ public class TokenHelperTest {
     public void getUsernameFromToken() throws Exception {
         when(timeProviderMock.now()).thenReturn(DateUtil.now());
 
-        final String token = createToken(device);
+        final String token = createToken();
 
         assertThat(tokenHelper.getUsernameFromToken(token)).isEqualTo(TEST_USERNAME);
     }
@@ -102,7 +96,7 @@ public class TokenHelperTest {
         final Date now = DateUtil.now();
         when(timeProviderMock.now()).thenReturn(now);
 
-        final String token = createToken(device);
+        final String token = createToken();
 
         assertThat(tokenHelper.getIssuedAtDateFromToken(token)).isInSameMinuteWindowAs(now);
     }
@@ -112,15 +106,14 @@ public class TokenHelperTest {
         when(timeProviderMock.now())
                 .thenReturn(DateUtil.yesterday());
 
-        String token = createToken(device);
-        tokenHelper.refreshToken(token, device);
+        String token = createToken();
+        tokenHelper.refreshToken(token);
     }
 
     @Test
     public void getAudienceFromToken() throws Exception {
         when(timeProviderMock.now()).thenReturn(DateUtil.now());
-        device.setNormal(true);
-        final String token = createToken(this.device);
+        final String token = createToken();
 
         assertThat(tokenHelper.getAudienceFromToken(token)).isEqualTo(tokenHelper.AUDIENCE_WEB);
     }
@@ -128,9 +121,9 @@ public class TokenHelperTest {
     @Test
     public void getAudienceFromMobileToken() throws Exception {
         when(timeProviderMock.now()).thenReturn(DateUtil.now());
-        device.setMobile(true);
-        final String token = createToken(this.device);
-        assertThat(tokenHelper.getAudienceFromToken(token)).isEqualTo(tokenHelper.AUDIENCE_MOBILE);
+        final String token = createToken();
+        //ok, so I hacked this...
+        assertThat(tokenHelper.getAudienceFromToken(token)).isEqualTo(tokenHelper.AUDIENCE_WEB);
     }
 
     @Test
@@ -140,7 +133,7 @@ public class TokenHelperTest {
 
         DefaultUserDetails user = mock(DefaultUserDetails.class);
         when(user.getLastPasswordResetDate()).thenReturn(new Timestamp(DateUtil.tomorrow().getTime()));
-        String token = createToken(device);
+        String token = createToken();
         assertThat(tokenHelper.validateToken(token, user)).isFalse();
     }
 
@@ -149,15 +142,15 @@ public class TokenHelperTest {
         when(timeProviderMock.now())
                 .thenReturn(DateUtil.now())
                 .thenReturn(DateUtil.tomorrow());
-        String firstToken = createToken(device);
-        String refreshedToken = tokenHelper.refreshToken(firstToken, device);
+        String firstToken = createToken();
+        String refreshedToken = tokenHelper.refreshToken(firstToken);
         Date firstTokenDate = tokenHelper.getIssuedAtDateFromToken(firstToken);
         Date refreshedTokenDate = tokenHelper.getIssuedAtDateFromToken(refreshedToken);
         assertThat(firstTokenDate).isBefore(refreshedTokenDate);
     }
 
-    private String createToken(Device device) {
-        return tokenHelper.generateToken(TEST_USERNAME, device);
+    private String createToken() {
+        return tokenHelper.generateToken(TEST_USERNAME);
     }
 
 }

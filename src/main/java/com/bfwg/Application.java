@@ -5,11 +5,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {
-		"com.bfwg.config",  //config files
-		"com.bfwg.web",		//controllers
-		"com.bfwg.remote"   //repositories
-})
+@ComponentScan
+
 public class Application {
 
 	public static void main(String[] args) {

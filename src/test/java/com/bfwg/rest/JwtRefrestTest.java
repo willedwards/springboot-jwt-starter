@@ -1,12 +1,10 @@
 package com.bfwg.rest;
 
-import com.bfwg.config.DeviceProvider;
 import com.bfwg.config.TimeProvider;
+import com.bfwg.config.TokenHelper;
 import com.bfwg.converters.DefaultUserDetailsConverter;
 import com.bfwg.dto.DefaultUserDetails;
-import com.bfwg.remote.UserEntity;
-import com.bfwg.config.DeviceDummy;
-import com.bfwg.config.TokenHelper;
+import com.bfwg.entities.UserEntity;
 import com.bfwg.service.UserService;
 import org.assertj.core.util.DateUtil;
 import org.junit.Before;
@@ -16,7 +14,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.mobile.device.Device;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -24,11 +21,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.sql.Timestamp;
 import java.util.Date;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -58,11 +53,8 @@ public class JwtRefrestTest {
     @Autowired
     private WebApplicationContext context;
 
-    @MockBean
-    private DeviceProvider deviceProvider;
 
-    @Autowired
-    private DeviceDummy device;
+
 
     @Before
     public void setup() {
@@ -75,7 +67,7 @@ public class JwtRefrestTest {
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername("username");
         userEntity.setRole("ROLE_USER");
-        userEntity.setLastPasswordResetDate(new Timestamp(DateUtil.yesterday().getTime()));
+        userEntity.setLastPasswordResetDate(DateUtil.yesterday().getTime());
 
         DefaultUserDetails defaultUserDetails = DefaultUserDetailsConverter.from(userEntity);
 
@@ -86,9 +78,7 @@ public class JwtRefrestTest {
         ReflectionTestUtils.setField(tokenHelper, "MOBILE_EXPIRES_IN", 200); // 200 sec
         ReflectionTestUtils.setField(tokenHelper, "SECRET", "queenvictoria");
 
-        device.setMobile(false);
-        device.setNormal(false);
-        device.setTablet(false);
+
     }
 
     @Test
@@ -107,11 +97,9 @@ public class JwtRefrestTest {
         given(timeProviderMock.now())
                 .willReturn(new Date(30L));
 
-        device.setNormal(true);
-        String token = createToken(device);
-        String refreshedToken = tokenHelper.refreshToken(token, device);
-        given(deviceProvider.getCurrentDevice(any()))
-                .willReturn(device);
+        String token = createToken();
+        String refreshedToken = tokenHelper.refreshToken(token);
+
         this.mvc.perform(post("/auth/refresh")
                 .header("Authorization", "Bearer " + token))
                 .andExpect(content().json("{access_token:" + refreshedToken + ",expires_in:100}"));
@@ -122,22 +110,22 @@ public class JwtRefrestTest {
     public void shouldRefreshNotExpiredMobileToken() throws Exception {
         given(timeProviderMock.now())
                 .willReturn(new Date(30L));
-        device.setMobile(true);
-        String token = createToken(device);
-        String refreshedToken = tokenHelper.refreshToken(token, device);
-        given(deviceProvider.getCurrentDevice(any()))
-                .willReturn(device);
+
+        String token = createToken();
+        String refreshedToken = tokenHelper.refreshToken(token);
+
+
         this.mvc.perform(post("/auth/refresh")
                 .header("Authorization", "Bearer " + token))
-                .andExpect(content().json("{access_token:" + refreshedToken + ",expires_in:200}"));
+                .andExpect(content().json("{access_token:" + refreshedToken + ",expires_in:100}"));
     }
 
     @Test
     public void shouldNotRefreshExpiredWebToken() throws Exception {
         Date beforeSomeTime = new Date(DateUtil.now().getTime() - 15 * 1000);
         when(timeProviderMock.now()).thenReturn(beforeSomeTime);
-        device.setNormal(true);
-        String token = createToken(device);
+
+        String token = createToken();
         this.mvc.perform(post("/auth/refresh")
                 .header("Authorization", "Bearer " + token))
                 .andExpect(content().json("{access_token:null,expires_in:null}"));
@@ -147,13 +135,13 @@ public class JwtRefrestTest {
     public void shouldRefreshExpiredMobileToken() throws Exception {
         Date beforeSomeTime = new Date(DateUtil.now().getTime() - 15 * 1000);
         when(timeProviderMock.now()).thenReturn(beforeSomeTime);
-        device.setNormal(true);
-        String token = createToken(device);
+
+        String token = createToken();
         this.mvc.perform(post("/auth/refresh").header("Authorization", "Bearer " + token))
                 .andExpect(content().json("{access_token:null,expires_in:null}"));
     }
 
-    private String createToken(Device device) {
-        return tokenHelper.generateToken(TEST_USERNAME, device);
+    private String createToken() {
+        return tokenHelper.generateToken(TEST_USERNAME);
     }
 }
